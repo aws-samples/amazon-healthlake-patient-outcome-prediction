@@ -1,0 +1,14 @@
+-e .
+pytest
+boto3
+aws-cdk.aws-apigateway
+aws-cdk.aws-cloudformation
+aws-cdk.aws-cloudwatch
+aws-cdk.aws-dynamodb
+aws-cdk.aws-iam
+aws-cdk.aws-lambda
+aws-cdk.aws-s3
+aws-cdk.aws-s3-deployment
+aws-cdk.aws-sagemaker
+aws-cdk.aws-iam
+pylint

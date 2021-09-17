@@ -1,0 +1,14 @@
+pyathena
+gensim
+pydot
+graphviz
+sphinx
+sphinx-rtd-theme
+matplotlib
+tensorflow==1.14
+keras
+sklearn
+sagemaker-containers
+plotly==4.6.0
+htmlmin
+shap

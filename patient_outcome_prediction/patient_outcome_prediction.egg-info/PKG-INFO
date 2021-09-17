@@ -1,0 +1,129 @@
+Metadata-Version: 2.1
+Name: patient-outcome-prediction
+Version: 0.0.1
+Summary: A sample CDK Python app
+Home-page: UNKNOWN
+Author: author
+License: UNKNOWN
+Description: 
+        # Introduction
+        Welcome to POP - Patient Outcome Prediction Python Project.
+        
+        Healthcare data can be challenging to work with and AWS customers have been looking for solutions to solve certain business challenges with the help of data and machine learning (ML) techniques. We have published an AWS Machine Learning Blog Post to show AWS customers how to [Build patient outcome prediction applications using Amazon HealthLake and Amazon SageMaker](https://aws.amazon.com/blogs/machine-learning/build-patient-outcome-prediction-applications-using-amazon-healthlake-and-amazon-sagemaker/). This repo is the open source project described in the blog post. 
+        
+        In this repo, we used a synthetic dataset from [Synthea](https://github.com/synthetichealth/synthea) due to data license considerations. However, users may choose to use your own FHIR data sets following our modeling structure. [Synthea](https://github.com/synthetichealth/synthea) is an open-source Git repository that allows HealthLake to generate FHIR R4-compliant resource bundles so that users can test models without using actual patient data. 
+        
+        This project has two majority components: backend (assets/model_backend/) and a frontend.
+        
+        These two components are currently asynchronized - backend models update the prediction results on-demand and save them as files on S3; frontend periodically grabs new files and render them accordingly. No dependencies are assumed between these two components.
+        
+        # Solution Walk-through
+        
+        ## 1. Create HealthLake Data Store
+        
+        The backend of this solution uses AWS HealthLake (GA on 07/15/2021), which currently requires AWS CLI or Python API setup. CDK setup steps will be added once the service is officially supported by CDK.
+        
+        In the AWS CLI, run the following command to create a data store, and  pre-load a dataset from Synthea. The following command takes ~30 minutes for HealthLake to create the data store. 
+        
+        ```shell
+        aws healthlake create-fhir-datastore --region us-east-1 --datastore-type-version R4 --preload-data-config PreloadDataType="SYNTHEA" --datastore-name pop-synthea
+        ```
+        After the command being executed, keep a record of the data store ID from the response. We will refer to this id as <your-data-store-id>. 
+        
+        ## 2. (Optional) Run a sample query
+        
+        This step is optional. 
+        You can run a sample query in the console or via CLI to get a sense of data loaded to your data store.
+        
+        ```shell
+        GET /datastore/<your-data-store-id>/r4/Procedure?code=371908008 HTTP/1.1
+        Host: healthlake.us-east-1.amazonaws.com
+        Content-Type: application/json
+        Authorization: AWS4-HMAC-SHA256 Credential=<your-credential>
+        ```
+        
+        ## 3. Export the data store to an S3 bucket.
+        
+        As a HIPAA-eligible service, HealthLake requires data encryption at rest and in transit. When creating this S3 bucket, we need to enable Server-side encryption: Amazon S3 master-key (SSE-S3).
+        
+        ```shell
+        aws healthlake start-fhir-export-job \
+            --output-data-config S3Uri="s3://<your-data-export-bucket-name>" \
+            --datastore-id <your-data-store-id> \
+            --data-access-role-arn arn:aws:iam::<your-account-id>:role/<your-role>
+        ``` 
+        
+        ## 4. CDK setup for modeling and front-end
+        First, manually create a virtualenv on MacOS and Linux.
+        Once the virtualenv is activated, you can install the required dependencies.
+        
+        ```shell
+        python3 -m venv .venv
+        source .venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        ```
+        
+        At this point you can synthesize the CloudFormation template.
+        
+        ```shell
+        cdk synth
+        ```
+        
+        You can now begin exploring the source code, contained in the `assets` directory.
+        There is also a very trivial test included that detects if all moldules are included in the CloudFormation template result:
+        
+        ```shell
+        pytest
+        ```
+        
+        Now, you can deploy the stacks.
+        
+        ```shell
+        cdk deploy
+        ```
+        
+        ## 5. Other useful CDK commands
+        
+        * `cdk ls`          list all stacks in the app
+        * `cdk synth`       emits the synthesized CloudFormation template
+        * `cdk deploy`      deploy this stack to your default AWS account/region
+        * `cdk diff`        compare deployed stack with current state
+        * `cdk docs`        open CDK documentation
+        
+        
+        # Backend Modeling
+        
+        Model training and inference are in folder `assets/modeling/`
+        
+        The structure is as follows:
+        
+        ```shell
+         ├── README.md                        <- The summary file of this project
+         ├── data                             <- A temporary location to hold data files, not in CodeCommit
+         ├── docs                             <- The Sphinx documentation folder
+         ├── ml                               <- Source code location that contains all the machine learning modules
+         │   ├── config.py                    <- This file defines contant variables
+         │   ├── data.py                      <- This file contains helper functions reading from s3, loading embedding matrix, df->tensors etc
+         │   ├── evaluation.py                <- Evaluation functions used by model training 
+         │   ├── evaluation_tf.py             <- Evaluation functions specifically for TensorFlow framework
+         │   ├── requirements.txt             <- Requirements for SageMaker hosted container
+         │   └── visualize.py                 <- Visualization function to analyze the data
+         ├── models                           <- A temporary location to store the embedding model and trained ml models, not in CodeCommit
+         ├── notebooks                        <- A folder containing notebook experiments
+         └── requirements.txt                 <- The project dependencies. Run `pip install -r requirements.txt` before you start
+        ```
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: JavaScript
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Topic :: Software Development :: Code Generators
+Classifier: Topic :: Utilities
+Classifier: Typing :: Typed
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
