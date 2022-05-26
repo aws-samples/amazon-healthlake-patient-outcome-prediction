@@ -5,7 +5,7 @@ graphviz
 sphinx
 sphinx-rtd-theme
 matplotlib
-tensorflow==1.14
+tensorflow==2.7.2
 keras
 sklearn
 sagemaker-containers
