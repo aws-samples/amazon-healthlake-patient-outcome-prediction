@@ -1,3 +1,7 @@
+# *** DEPRECATION WARNING 2022-09-06 ***
+Thank you for visiting the public repository for the Patient Outcome Prediction (POP) Project.  This version of the application depends on a previous version of a dependency which needs to be updated.  We are archiving this repository while we update our dependencies and add features.  The repo will reupload with a more up-to-date version at a future date.
+
+Thank you for your understanding and patience.
 
 # Introduction
 Welcome to POP - Patient Outcome Prediction Python Project.
